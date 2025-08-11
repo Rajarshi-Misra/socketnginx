@@ -15,8 +15,8 @@ func checkError(err error) {
 	}
 }
 
-func startServer() {
-	ln, err := net.Listen("tcp", ":8000")
+func startProxy() {
+	ln, err := net.Listen("tcp", ":8080")
 	checkError(err)
 	fmt.Println("Listening on 8000")
 	conn, err := ln.Accept()
@@ -33,7 +33,7 @@ func startServer() {
 func main() {
 	go func() {
 		fmt.Println("Starting server...")
-		startServer()
+		startProxy()
 	}()
 
 	time.Sleep(1 * time.Second)
