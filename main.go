@@ -1,43 +1,45 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"log"
-	"net"
-	"strings"
-	"time"
+    "flag"
+    "fmt"
+    "io"
+    "log"
+    "net"
 )
 
-func checkError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func startProxy() {
-	ln, err := net.Listen("tcp", ":8080")
-	checkError(err)
-	fmt.Println("Listening on 8000")
-	conn, err := ln.Accept()
-	checkError(err)
-	for {
-		message, err := bufio.NewReader(conn).ReadString('\n')
-		checkError(err)
-		fmt.Print("Message Received:", string(message))
-		newmessage := strings.ToUpper(message)
-		conn.Write([]byte(newmessage + "\n"))
-	}
-}
-
 func main() {
-	go func() {
-		fmt.Println("Starting server...")
-		startProxy()
-	}()
+    listenAddr := flag.String("listen", ":8080", "Address to listen on")
+    backendAddr := flag.String("backend", "localhost:9001", "Backend address to proxy to")
+    flag.Parse()
 
-	time.Sleep(1 * time.Second)
+    ln, err := net.Listen("tcp", *listenAddr)
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Printf("Proxy listening on %s, forwarding to %s\n", *listenAddr, *backendAddr)
 
-	fmt.Println("Starting client...")
-	StartClient()
+    for {
+        clientConn, err := ln.Accept()
+        if err != nil {
+            log.Println("Accept error:", err)
+            continue
+        }
+        go handleConnection(clientConn, *backendAddr)
+    }
+}
+
+func handleConnection(clientConn net.Conn, backendAddr string) {
+    backendConn, err := net.Dial("tcp", backendAddr)
+    if err != nil {
+        log.Println("Backend connection error:", err)
+        clientConn.Close()
+        return
+    }
+    defer clientConn.Close()
+    defer backendConn.Close()
+
+    // Bidirectional copy
+    go io.Copy(backendConn, clientConn)
+    io.Copy(clientConn, backendConn)
 }
