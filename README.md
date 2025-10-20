@@ -11,3 +11,5 @@ bash
 
 3. Connect a TCP Client
 Any TCP client connecting to localhost:8080 will be transparently proxied to localhost:9001.
+
+Check this project where I used it locally[[https://github.com/Rajarshi-Misra/Bitcoin-AI-Agent]]
