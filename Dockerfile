@@ -37,4 +37,4 @@ USER appuser
 
 EXPOSE 8080
 
-CMD ["./proxy", "--listen", ":8080", "--backend", "https://bitcoin-ai-agent-production.up.railway.app/"]
+CMD ["./proxy", "--listen", ":8080"]

@@ -5,11 +5,16 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 )
 
 func main() {
 	listenAddr := flag.String("listen", ":8080", "Address to listen on")
-	backendAddr := flag.String("backend", "localhost:9001", "Backend address to proxy to")
+	defaultBackend := os.Getenv("BACKEND_ADDR")
+	if defaultBackend == "" {
+		defaultBackend = "localhost:9001" // fallback default
+	}
+	backendAddr := flag.String("backend", defaultBackend, "Backend address to proxy to")
 	flag.Parse()
 
 	ln, err := net.Listen("tcp", *listenAddr)
